@@ -1,9 +1,11 @@
 process.env.NODE_ENV = 'production'
+process.env.ON_SERVER = 'true'
 
 require('dotenv').config()
 require('babel-register')
 
 const path = require('path')
+const Module = require('module')
 
 const MockBrowser = require('mock-browser').mocks.MockBrowser
 const mock = new MockBrowser()
@@ -15,11 +17,9 @@ global.history = mock.getHistory()
 global.localStorage = mock.getLocalStorage()
 global.sessionStorage = mock.getSessionStorage()
 
-const Module = require('module');
-const originalRequire = Module.prototype.require;
-
 const fileEndingRegex = /\.(css|png)$/
 
+const originalRequire = Module.prototype.require;
 Module.prototype.require = function (requirePath, ...remainingArgs) {
     try {
         const fileExtension = path.parse(requirePath).ext
@@ -34,4 +34,4 @@ Module.prototype.require = function (requirePath, ...remainingArgs) {
     return originalRequire.apply(this, [requirePath, ...remainingArgs]);
 };
 
-require('./prerender')
+require('./src/prerender')
