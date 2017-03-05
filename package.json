@@ -1,5 +1,5 @@
 {
-  "name": "create-react-app-prerender",
+  "name": "simple-react-prerender",
   "version": "1.0.0",
   "description": "a simple tool to prerender apps created with create-react-app",
   "main": "index.js",
