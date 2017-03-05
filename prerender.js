@@ -48,7 +48,7 @@ printForEnvVar('BUILT_HTML_PATH')
 printForEnvVar('ROOT_ID')
 printForEnvVar('APP_PATH')
 
-const builtHtmlPath = process.env.BUILT_HTML_PATH
+const builtIndexHtmlPath = process.env.BUILT_HTML_PATH
 const rootId = process.env.ROOT_ID
 const AppPath = process.env.APP_PATH
 
@@ -64,19 +64,19 @@ print({
     errorPart: 'execute'
 }, () => App = require(AppPath).default)
 
-let file;
+let builtIndexHtml;
 print({
     prefix: 'Reading',
-    suffix: builtHtmlPath,
+    suffix: builtIndexHtmlPath,
     errorPart: 'find'
-}, () => file = fs.readFileSync(builtHtmlPath, fsOptions))
+}, () => builtIndexHtml = fs.readFileSync(builtIndexHtmlPath, fsOptions))
 
 print({
     prefix: 'Searching for',
-    suffix: `"${rootDiv}" in file in ${builtHtmlPath}`,
+    suffix: `"${rootDiv}" in file in ${builtIndexHtmlPath}`,
     errorPart: 'find'
 }, () => {
-    if (!file.includes(rootDiv)) throw new Error()
+    if (!builtIndexHtml.includes(rootDiv)) throw new Error()
 })
 
 let prerendererdString;
@@ -86,20 +86,18 @@ print({
     errorPart: 'prerender',
 }, () => prerendererdString = ReactDOMServer.renderToString(<App />))
 
-let newData
+let newIndexHtml
 print({
     prefix: 'Replacing',
     suffix: `"${rootDiv}" with prerendered html`,
     errorPart: 'replace'
-}, () => newData = file.replace(rootDiv, rootDivPrefix + prerendererdString + rootDivPostfix))
+}, () => newIndexHtml = builtIndexHtml.replace(rootDiv, rootDivPrefix + prerendererdString + rootDivPostfix))
 
 print({
     prefix: 'Overwriting',
-    suffix: `${builtHtmlPath}, containing the prerendered React Component from ${AppPath}`,
+    suffix: `${builtIndexHtmlPath}, containing the prerendered React Component from ${AppPath}`,
     errorPart: 'overwrite'
-}, () => {
-    fs.writeFileSync(builtHtmlPath, newData, fsOptions)
-})
+}, () => fs.writeFileSync(builtIndexHtmlPath, newIndexHtml, fsOptions))
 
 console.log(chalk.green(`Prerendered successfully. ${greenHook}`))
 console.log()
