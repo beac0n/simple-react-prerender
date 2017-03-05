@@ -6,10 +6,14 @@ const redCross = chalk.red('\u2716')
 const greenHook = chalk.green('\u2714')
 const blueInfo = chalk.blue('\u2139')
 
-const printInfo = (message) => console.info(blueInfo, `${message || ''}.`)
-const printWarn = (message) => console.warn(yellowSign, `${message || ''}.`)
-const printError = (message) => console.error(redCross, `${message || ''}.`)
-const printNoLineBreak = (message) => process.stdout.write(message || '')
+const messageParse = (message, newLineReplacement) => typeof message === 'string'
+    ? `${newLineReplacement} ${message.replace('\n', `\n${newLineReplacement} `)}.`
+    : ''
+
+const printInfo = (message) => console.info(messageParse(message, blueInfo))
+const printWarn = (message) => console.warn(messageParse(message, yellowSign))
+const printError = (message) => console.error(messageParse(message, redCross))
+const printNoLineBreak = (message) => process.stdout.write(message)
 
 export const print = (message) => console.log(message || '')
 export const printSuccess = (message) => print(chalk.green(`${message || ''} ${greenHook}`))

@@ -17,8 +17,8 @@ const AppPath = process.env.APP_PATH
 const fsOptions = {encoding: 'utf8'}
 const rootDivPrefix = `<div id="${rootId}">`
 const rootDivPostfix = '</div>'
-
 const rootDiv = rootDivPrefix + rootDivPostfix
+
 let App
 printHandle({
     prefix: 'Executing',
@@ -39,9 +39,10 @@ printHandle({
     prefix: 'Searching for',
     suffix: `"${rootDiv}" in file in ${builtIndexHtmlPath}`,
     errorPart: 'find',
-    hint: `Make sure that there are no unnecessary spaces between or in ${rootDivPrefix} and ${rootDivPostfix}`,
+    hint: `Make sure that there are no unnecessary spaces between or in ${rootDivPrefix} and ${rootDivPostfix}.\n` +
+    `Also the App might already be prerendered in ${builtIndexHtmlPath}`,
 }, () => {
-    if (!builtIndexHtml.includes(rootDiv)) throw {message: ''}
+    if (!builtIndexHtml.includes(rootDiv)) throw ''
 })
 
 let prerendererdString
