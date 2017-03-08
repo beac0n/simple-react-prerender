@@ -1,8 +1,8 @@
-import fs from 'fs'
-import React from 'react'
-import ReactDOMServer from 'react-dom/server'
+const fs = require('fs')
+const React = require('react')
+const ReactDOMServer = require('react-dom/server')
 
-import {print, printSuccess, printHandle, printHandleEnvVar} from './util'
+const {print, printSuccess, printHandle, printHandleEnvVar} = require('./util')
 
 print(`Creating an optimized, prerendered index.html...`)
 
@@ -52,7 +52,7 @@ printHandle({
     errorPart: 'prerender',
     hint: `We are trying to mock the browser the best we can, but sometimes that doesn't work.\n` +
     `Try using the "ON_SERVER" environment variable in your code, to check if your code is being prerendered or not`,
-}, () => prerendererdString = ReactDOMServer.renderToString(<App />))
+}, () => prerendererdString = ReactDOMServer.renderToString(React.createElement(App)))
 
 let newIndexHtml
 printHandle({

@@ -1,5 +1,5 @@
-import chalk from 'chalk'
-import console from 'better-console'
+const chalk = require('chalk')
+const console = require('better-console')
 
 const yellowSign = chalk.yellow('\u26A0')
 const redCross = chalk.red('\u2716')
@@ -15,10 +15,10 @@ const printWarn = (message) => console.warn(messageParse(message, yellowSign))
 const printError = (message) => console.error(messageParse(message, redCross))
 const printNoLineBreak = (message) => process.stdout.write(message)
 
-export const print = (message) => console.log(message || '')
-export const printSuccess = (message) => print(chalk.green(`${message || ''} ${greenHook}`))
+const print = (message) => console.log(message || '')
+const printSuccess = (message) => print(chalk.green(`${message || ''} ${greenHook}`))
 
-export const printHandle = (message, callback) => {
+const printHandle = (message, callback) => {
     const {prefix, suffix, errorPart, hint} = message
 
     const onError = (err) => {
@@ -45,7 +45,7 @@ export const printHandle = (message, callback) => {
     }
 }
 
-export const printHandleEnvVar = (environmentVariableName, description) => {
+const printHandleEnvVar = (environmentVariableName, description) => {
     const envVar = process.env[environmentVariableName]
 
     printHandle({
@@ -57,3 +57,5 @@ export const printHandleEnvVar = (environmentVariableName, description) => {
         if (!envVar) throw `Expected process.env.${environmentVariableName} to be set but was ${envVar}`
     })
 }
+
+module.exports = {printHandleEnvVar, printHandle, printSuccess, print}
