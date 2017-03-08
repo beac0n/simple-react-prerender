@@ -4,7 +4,9 @@ process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
 
 require('dotenv').config()
-require('babel-register')
+require('babel-register')({
+    presets: ['react-app']
+})
 
 const path = require('path')
 const Module = require('module')
