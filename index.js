@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
 
