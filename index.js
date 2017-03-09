@@ -2,7 +2,7 @@
 
 const program = require('commander')
 program
-    .version('1.5.3')
+    .version('2.0.0')
     .option('-h --html <htmlPath>', 'path to built html')
     .option('-a --app <appPath>', 'path to app source file')
     .option('-i --rootId <rootId>', 'div id where the app is rendered')
