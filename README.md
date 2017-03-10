@@ -21,7 +21,7 @@ Don't forget to supply the mandatory arguments:
 
 For example:
 
-```js
+```json
 "scripts": {
   "prerender": "simple-react-prerender -h /home/foobar/dev/barfoo/build/index.html -a /home/foobar/dev/barfoo/src/App/index.js -i root"
 }
