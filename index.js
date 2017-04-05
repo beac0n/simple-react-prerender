@@ -13,7 +13,7 @@ const builtIndexHtmlPath = program.html
 const rootId = program.rootId
 const AppPath = program.app
 
-if(!builtIndexHtmlPath || !rootId || !AppPath ) {
+if (!builtIndexHtmlPath || !rootId || !AppPath) {
     program.help()
 }
 
@@ -26,10 +26,11 @@ const fs = require('fs')
 const React = require('react')
 const ReactDOMServer = require('react-dom/server')
 
-const {print, printSuccess, printHandle} = require('./util')
+const {print, printSuccess, printHandle, globalizeClasses} = require('./util')
 
 const MockBrowser = require('mock-browser').mocks.MockBrowser
 const mock = new MockBrowser()
+
 global.window = mock.getWindow()
 global.document = mock.getDocument()
 global.location = mock.getLocation()
@@ -37,6 +38,8 @@ global.navigator = mock.getNavigator()
 global.history = mock.getHistory()
 global.localStorage = mock.getLocalStorage()
 global.sessionStorage = mock.getSessionStorage()
+
+globalizeClasses(global.window)
 
 print(`Creating an optimized, prerendered index.html...`)
 
@@ -65,7 +68,7 @@ Module.prototype.require = function (requirePath, ...remainingArgs) {
 let App
 printHandle({
     prefix: 'Executing',
-    suffix: `require("${AppPath}").default`,
+    suffix: `require("${AppPath}").default`, // TODO: higlight commands in all printHandle
     errorPart: 'execute',
     hint: `The file in ${AppPath} has to export the App using either "export default App" or module.exports = { default: App}`,
 }, () => App = require(AppPath).default)
@@ -94,7 +97,8 @@ printHandle({
     suffix: `React Component from ${AppPath}`,
     errorPart: 'prerender',
     hint: `We are trying to mock the browser the best we can, but sometimes that doesn't work.\n` +
-    `Try using the "ON_SERVER" environment variable in your code, to check if your code is being prerendered or not`,
+    `Try using the "ON_SERVER" environment variable in your code, to check if your code is being prerendered or not.\n` +
+    `If you are using global constructors (like new FormData()), try calling the constructor from the window object (e.g. new window.FormData())`,
 }, () => prerendererdString = ReactDOMServer.renderToString(React.createElement(App)))
 
 let newIndexHtml

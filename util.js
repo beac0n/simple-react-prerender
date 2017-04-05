@@ -6,8 +6,9 @@ const redCross = chalk.red('\u2716')
 const greenHook = chalk.green('\u2714')
 const blueInfo = chalk.blue('\u2139')
 
+const messageParseRegex = new RegExp('\n', 'g')
 const messageParse = (message, newLineReplacement) => typeof message === 'string'
-    ? `${newLineReplacement} ${message.replace('\n', `\n${newLineReplacement} `)}.`
+    ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`
     : ''
 
 const printInfo = (message) => console.info(messageParse(message, blueInfo))
@@ -58,4 +59,11 @@ const printHandleEnvVar = (environmentVariableName, description) => {
     })
 }
 
-module.exports = {printHandleEnvVar, printHandle, printSuccess, print}
+const globalizeClassesRegex = new RegExp(/[A-Z]/)
+const globalizeClasses = (classesContainerObject) => {
+    Object.keys(classesContainerObject)
+        .filter((key) => key.charAt(0).match(globalizeClassesRegex))
+        .forEach((key) => global[key] = classesContainerObject[key])
+}
+
+module.exports = {printHandleEnvVar, printHandle, printSuccess, print, globalizeClasses}
