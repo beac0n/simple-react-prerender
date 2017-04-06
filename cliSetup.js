@@ -1,0 +1,21 @@
+const program = require('commander')
+
+program.version('2.0.0')
+const options = [
+    ['-h --html <htmlPath>', 'path to built html'],
+    ['-a --app <appPath>', 'path to app source file'],
+    ['-i --rootId <rootId>', 'div id where the app is rendered'],
+    //['-b --babel [babelConfig]', 'a JSON string, providing your babel config'], // TODO
+]
+options.forEach((option) => program.option(option[0], option[1]))
+program.parse(process.argv)
+
+options.forEach((option) => {
+    const key = option[0].split(' ')[1].replace(/-/g, '')
+
+    if(!program[key]) {
+        program.help()
+    }
+})
+
+module.exports = program

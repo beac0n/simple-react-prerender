@@ -1,5 +1,6 @@
 const chalk = require('chalk')
 const console = require('better-console')
+const MockBrowser = require('mock-browser').mocks.MockBrowser
 
 const yellowSign = chalk.yellow('\u26A0')
 const redCross = chalk.red('\u2716')
@@ -32,6 +33,7 @@ const printHandle = (message, callback) => {
         if (hint) {
             printWarn(hint)
         }
+
         printInfo('Stopping prerender')
         process.exit(0)
     }
@@ -66,4 +68,16 @@ const globalizeClasses = (classesContainerObject) => {
         .forEach((key) => global[key] = classesContainerObject[key])
 }
 
-module.exports = {printHandleEnvVar, printHandle, printSuccess, print, globalizeClasses}
+const mockBrowser = (mock) => {
+    const mockBrowser = new MockBrowser()
+
+    mock.window = mockBrowser.getWindow()
+    mock.document = mockBrowser.getDocument()
+    mock.location = mockBrowser.getLocation()
+    mock.navigator = mockBrowser.getNavigator()
+    mock.history = mockBrowser.getHistory()
+    mock.localStorage = mockBrowser.getLocalStorage()
+    mock.sessionStorage = mockBrowser.getSessionStorage()
+}
+
+module.exports = {printHandleEnvVar, printHandle, printSuccess, print, globalizeClasses, mockBrowser}
