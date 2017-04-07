@@ -1,6 +1,6 @@
 const program = require('commander')
 
-program.version('2.1.0')
+program.version('2.2.0')
 
 const options = [
     ['-h --html <htmlPath>', 'path to built html'],
