@@ -7,20 +7,20 @@ const greenHook = chalk.green('\u2714')
 const blueInfo = chalk.blue('\u2139')
 
 const messageParseRegex = new RegExp('\n', 'g')
-const messageParse = (message, newLineReplacement) => typeof message === 'string'
-    ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`
+const parseMessage = (message = '', newLineReplacement = '') => typeof message === 'string'
+    ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`.trim()
     : ''
 
-const printInfo = (message) => console.info(messageParse(message, blueInfo))
-const printWarn = (message) => console.warn(messageParse(message, yellowSign))
-const printError = (message) => console.error(messageParse(message, redCross))
-const printNoLineBreak = (message) => process.stdout.write(message)
+const printInfo = (message = '') => console.info(parseMessage(message, blueInfo))
+const printWarn = (message = '') => console.warn(parseMessage(message, yellowSign))
+const printError = (message = '') => console.error(parseMessage(message, redCross))
+const printNoLineBreak = (message = '') => process.stdout.write(message.trim())
 
-const print = (message) => console.log(message || '')
-const printSuccess = (message) => print(chalk.green(`${message || ''} ${greenHook}`))
+const print = (message = '') => console.log(message.trim())
+const printSuccess = (message = '') => print(chalk.green(`${message} ${greenHook}`))
 
-const getPresentParticiple = (verb) => {
-    if (!verb || verb.length <= 1) return verb
+const getPresentParticiple = (verb = '') => {
+    if (verb.length <= 1) return verb
 
     let base = verb
 
@@ -34,8 +34,8 @@ const getPresentParticiple = (verb) => {
     return base + 'ing'
 }
 
-const printHandle = (message, callback) => {
-    const {verb, suffix, hint} = message
+const printHandle = (message = {}, callback) => {
+    const {verb = '', suffix = '', hint = ''} = message
 
     const onError = (err) => {
         print()

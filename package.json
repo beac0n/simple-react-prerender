@@ -1,7 +1,7 @@
 {
   "name": "simple-react-prerender",
   "version": "2.1.0",
-  "description": "a simple tool to prerender apps created with create-react-app",
+  "description": "a simple tool to prerender react apps",
   "main": "index.js",
   "repository": "https://github.com/beac0n/create-react-app-prerender.git",
   "author": "beac0n <mcschempp@gmx.de>",
