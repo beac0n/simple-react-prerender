@@ -1,83 +1,41 @@
-const chalk = require('chalk')
-const console = require('better-console')
+const Module = require('module')
+const path = require('path')
 const MockBrowser = require('mock-browser').mocks.MockBrowser
 
-const yellowSign = chalk.yellow('\u26A0')
-const redCross = chalk.red('\u2716')
-const greenHook = chalk.green('\u2714')
-const blueInfo = chalk.blue('\u2139')
+// jsdom keeps global stuff in window._core: https://github.com/tmpvar/jsdom/blob/master/lib/jsdom/browser/Window.js
+const globalizeWebAPIs = () => Object.keys(global.window._core).forEach((key) => global[key] = global.window._core[key])
+const mockBrowser = () => {
+    if (global.window) return
 
-const messageParseRegex = new RegExp('\n', 'g')
-const messageParse = (message, newLineReplacement) => typeof message === 'string'
-    ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`
-    : ''
-
-const printInfo = (message) => console.info(messageParse(message, blueInfo))
-const printWarn = (message) => console.warn(messageParse(message, yellowSign))
-const printError = (message) => console.error(messageParse(message, redCross))
-const printNoLineBreak = (message) => process.stdout.write(message)
-
-const print = (message) => console.log(message || '')
-const printSuccess = (message) => print(chalk.green(`${message || ''} ${greenHook}`))
-
-const printHandle = (message, callback) => {
-    const {prefix, suffix, errorPart, hint} = message
-
-    const onError = (err) => {
-        print()
-        printError(`Failed to ${errorPart} ${suffix}`)
-        if (err) {
-            console.error(redCross, err)
-        }
-
-        if (hint) {
-            printWarn(hint)
-        }
-
-        printInfo('Stopping prerender')
-        process.exit(0)
-    }
-
-    printNoLineBreak(`${prefix} ${suffix}...`)
-    try {
-        callback()
-        printSuccess()
-    }
-    catch (err) {
-        onError(err)
-    }
-}
-
-const printHandleEnvVar = (environmentVariableName, description) => {
-    const envVar = process.env[environmentVariableName]
-
-    printHandle({
-        prefix: 'Checking',
-        suffix: `if process.env.${environmentVariableName} is set`,
-        errorPart: 'check',
-        hint: `Make sure that you have set the needed environment variable ${environmentVariableName}: ${description}`,
-    }, () => {
-        if (!envVar) throw `Expected process.env.${environmentVariableName} to be set but was ${envVar}`
-    })
-}
-
-const globalizeClassesRegex = new RegExp(/[A-Z]/)
-const globalizeClasses = (classesContainerObject) => {
-    Object.keys(classesContainerObject)
-        .filter((key) => key.charAt(0).match(globalizeClassesRegex))
-        .forEach((key) => global[key] = classesContainerObject[key])
-}
-
-const mockBrowser = (mock) => {
     const mockBrowser = new MockBrowser()
 
-    mock.window = mockBrowser.getWindow()
-    mock.document = mockBrowser.getDocument()
-    mock.location = mockBrowser.getLocation()
-    mock.navigator = mockBrowser.getNavigator()
-    mock.history = mockBrowser.getHistory()
-    mock.localStorage = mockBrowser.getLocalStorage()
-    mock.sessionStorage = mockBrowser.getSessionStorage()
+    global.window = mockBrowser.getWindow()
+    global.document = mockBrowser.getDocument()
+    global.location = mockBrowser.getLocation()
+    global.navigator = mockBrowser.getNavigator()
+    global.history = mockBrowser.getHistory()
+    global.localStorage = mockBrowser.getLocalStorage()
+    global.sessionStorage = mockBrowser.getSessionStorage()
+
+    globalizeWebAPIs()
 }
 
-module.exports = {printHandleEnvVar, printHandle, printSuccess, print, globalizeClasses, mockBrowser}
+const overwriteRequire = () => {
+    const fileEndingRegex = /\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|css|less|sass)$/
+    const originalRequire = Module.prototype.require;
+    Module.prototype.require = function (requirePath, ...remainingArgs) {
+        try {
+            const fileExtension = path.parse(requirePath).ext
+            if (fileExtension.length > 0 && fileEndingRegex.test(fileExtension)) {
+                return // file extension can't be loaded by node => ignore
+            }
+        }
+        catch (err) {
+            // let the original require call handle this...
+        }
+
+        return originalRequire.apply(this, [requirePath, ...remainingArgs]);
+    }
+}
+
+module.exports = {mockBrowser, overwriteRequire}
