@@ -1,25 +1,35 @@
 #!/usr/bin/env node
 
-const program = require('./cliSetup')
+const util = require('./util')
+util.mockBrowser(global)
+util.globalizeClasses(global.window)
 
-const builtIndexHtmlPath = program.html
-const rootId = program.rootId
-const appPath = program.app
+const program = require('./cliSetup')
+const chalk = require('chalk')
+const path = require('path')
+const Module = require('module')
+const fs = require('fs')
+
+const React = require('react')
+const ReactDOMServer = require('react-dom/server')
+
+const {html: builtIndexHtmlPath, rootId, app: appPath, babel} = program
+
+let babelConfig = {presets: ['react-app']}
+
+if (babel) {
+    util.printHandle({
+        prefix: 'Parsing',
+        suffix: `your provided ${chalk.yellow('babel')} config`,
+        errorPart: 'parse',
+        hint: `Make sure your ${chalk.yellow('babel')} config is a valid ${chalk.yellow('JSON')} string`,
+    }, () => babelConfig = JSON.parse(babel))
+}
 
 process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
 
-require('babel-register')({presets: ['react-app']}) // TODO: make this configurable
-const path = require('path')
-const Module = require('module')
-const fs = require('fs')
-const chalk = require('chalk')
-const React = require('react')
-const ReactDOMServer = require('react-dom/server')
-const util = require('./util')
-
-util.mockBrowser(global)
-util.globalizeClasses(global.window)
+require('babel-register')(babelConfig)
 
 util.print(`Creating an optimized, prerendered index.html...`)
 
