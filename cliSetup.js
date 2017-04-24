@@ -7,6 +7,7 @@ const options = [
     ['-a --app <appPath>', 'path to app source file'],
     ['-i --rootId <rootId>', 'div id where the app is rendered'],
     ['-b --babel [babelConfig]', 'a JSON string, providing your babel config', true],
+    ['-d --dry', 'execute dry run, which does not save the prerendered html', true],
 ]
 options.forEach((option) => program.option(option[0], option[1]))
 program.parse(process.argv)

@@ -11,13 +11,13 @@ const parseMessage = (message = '', newLineReplacement = '') => typeof message =
     ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`.trim()
     : ''
 
-const printInfo = (message = '') => console.info(parseMessage(message, blueInfo))
-const printWarn = (message = '') => console.warn(parseMessage(message, yellowSign))
-const printError = (message = '') => console.error(parseMessage(message, redCross))
+const info = (message = '') => console.info(chalk.white(parseMessage(message, blueInfo)))
+const warn = (message = '') => console.warn(parseMessage(message, yellowSign))
+const error = (message = '') => console.error(parseMessage(message, redCross))
 const printNoLineBreak = (message = '') => process.stdout.write(message.trim())
 
 const print = (message = '') => console.log(message.trim())
-const printSuccess = (message = '') => print(chalk.green(`${message} ${greenHook}`))
+const success = (message = '') => print(chalk.green(`${message} ${greenHook}`))
 
 const getPresentParticiple = (verb = '') => {
     if (verb.length <= 1) return verb
@@ -34,32 +34,37 @@ const getPresentParticiple = (verb = '') => {
     return base + 'ing'
 }
 
-const printHandle = (message = {}, callback) => {
+const handle = (message = {}, callback = (() => {}), skip = false) => {
     const {verb = '', suffix = '', hint = ''} = message
 
     const onError = (err) => {
         print()
-        printError(`Failed to ${verb.toLowerCase()} ${suffix}`)
+        error(`Failed to ${verb.toLowerCase()} ${suffix}`)
         if (err) {
             console.error(redCross, err)
         }
 
         if (hint) {
-            printWarn(hint)
+            warn(hint)
         }
     }
 
-    printNoLineBreak(`${getPresentParticiple(verb)} ${suffix}...`)
-    try {
-        callback()
-        printSuccess()
+    if (skip) {
+        printNoLineBreak(parseMessage(`Skipping to ${verb.toLowerCase()} ${suffix}...`, blueInfo))
     }
-    catch (err) {
-        onError(err)
-        return false
+    else {
+        printNoLineBreak(`${getPresentParticiple(verb)} ${suffix}...`)
+        try {
+            callback()
+        }
+        catch (err) {
+            onError(err)
+            return false
+        }
     }
 
+    success()
     return true
 }
 
-module.exports = {printHandle, printSuccess, printInfo, print}
+module.exports = {handle, success, info, warn, print}

@@ -11,7 +11,7 @@ const util = require('./util')
 const printUtil = require('./printUtil')
 const program = require('./cliSetup')
 
-const {html, rootId, app, babel} = program
+const {html, rootId, app, babel, dry} = program
 
 process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
@@ -22,12 +22,16 @@ const divSuffix = '</div>'
 const div = divPrefix + divSuffix
 
 printUtil.print(`Creating an optimized, prerendered index.html...`)
+if (dry) {
+    printUtil.info(`Dry run is enabled - no files will be changed...`)
+}
+printUtil.print()
 
 const steps = [
     (state) => {
         // TODO: check if babel is a rc file => load file
         if (babel) {
-            state.hasError = !printUtil.printHandle({
+            state.hasError = !printUtil.handle({
                 verb: 'Parse',
                 suffix: `your provided ${chalk.yellow('babel')} config`,
                 errorPart: 'parse',
@@ -37,8 +41,8 @@ const steps = [
     },
     (state) => {
         util.mockBrowser()
-        util.overwriteRequire()
-        state.hasError = !printUtil.printHandle({
+        util.nodeifyRequire()
+        state.hasError = !printUtil.handle({
             verb: 'Execute',
             suffix: `${chalk.yellow(`require(${app}).default`)}`,
             hint: `The file in ${app} has to export the App using either ${chalk.yellow('export default App')} or ` +
@@ -46,7 +50,7 @@ const steps = [
         }, () => state.App = require(app).default)
     },
     (state) => {
-        state.hasError = !printUtil.printHandle({
+        state.hasError = !printUtil.handle({
             verb: 'Prerender',
             suffix: `React Component from ${chalk.yellow(app)}`,
             hint: `We are trying to mock the browser the best we can, but sometimes that doesn't work.\n` +
@@ -56,14 +60,14 @@ const steps = [
         }, () => state.prerendererd = ReactDOMServer.renderToString(React.createElement(state.App)))
     },
     (state) => {
-        state.hasError = !printUtil.printHandle({
+        state.hasError = !printUtil.handle({
             verb: 'Read',
             suffix: chalk.yellow(html),
             hint: `Make sure that this process can read the file you supplied: ${chalk.yellow(html)}`,
-        }, () => state.builtIndexHtml = fs.readFileSync(html, fsOptions))
+        }, () => state.builtIndexHtml = fs.readFileSync(html, fsOptions), dry)
     },
     (state) => {
-        state.hasError = !printUtil.printHandle({
+        state.hasError = !printUtil.handle({
             verb: 'Search',
             suffix: `for ${chalk.yellow(div)} in file in ${chalk.yellow(html)}`,
             hint: `Make sure that there are no unnecessary spaces between or in ` +
@@ -71,21 +75,21 @@ const steps = [
             `Also the App might already be prerendered in ${chalk.yellow(html)}`,
         }, () => {
             if (!state.builtIndexHtml.includes(div)) throw ''
-        })
+        }, dry)
     },
     (state) => {
-        state.hasError = !printUtil.printHandle({
+        state.hasError = !printUtil.handle({
             verb: 'Replace',
             suffix: `${chalk.yellow(div)} with prerendered html`,
-        }, () => state.newIndexHtml = state.builtIndexHtml.replace(div, divPrefix + state.prerendererd + divSuffix))
+        }, () => state.newIndexHtml = state.builtIndexHtml.replace(div, divPrefix + state.prerendererd + divSuffix), dry)
     },
     (state) => {
-        state.hasError = !printUtil.printHandle({ // TODO implement dry run
+        state.hasError = !printUtil.handle({
             verb: 'Overwrite',
             suffix: `${chalk.yellow(html)}, containing the prerendered React Component from ${chalk.yellow(app)}`,
             hint: `Make sure that this process can write to the file you supplied (${chalk.yellow(html)}) ` +
             `and that it is not being used by another process`,
-        }, () => fs.writeFileSync(html, state.newIndexHtml, fsOptions))
+        }, () => fs.writeFileSync(html, state.newIndexHtml, fsOptions), dry)
     },
 ]
 
@@ -93,7 +97,7 @@ steps.reduce((state, step) => {
     step(state)
 
     if (state.hasError) {
-        printUtil.printInfo('Stopping prerender')
+        printUtil.info('Stopping prerender')
         process.exit(1)
     }
 
@@ -101,6 +105,6 @@ steps.reduce((state, step) => {
 
 }, {hasError: false})
 
-printUtil.printSuccess('Prerendered successfully.')
+printUtil.success('Prerendered successfully.')
 printUtil.print()
 process.exit(0)

@@ -1,6 +1,7 @@
 const Module = require('module')
 const path = require('path')
 const MockBrowser = require('mock-browser').mocks.MockBrowser
+const printUtil = require('./printUtil')
 
 // jsdom keeps global stuff in window._core: https://github.com/tmpvar/jsdom/blob/master/lib/jsdom/browser/Window.js
 const globalizeWebAPIs = () => Object.keys(global.window._core).forEach((key) => global[key] = global.window._core[key])
@@ -20,7 +21,7 @@ const mockBrowser = () => {
     globalizeWebAPIs()
 }
 
-const overwriteRequire = () => {
+const nodeifyRequire = () => {
     const fileEndingRegex = /\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|css|less|sass)$/
     const originalRequire = Module.prototype.require;
     Module.prototype.require = function (requirePath, ...remainingArgs) {
@@ -31,11 +32,11 @@ const overwriteRequire = () => {
             }
         }
         catch (err) {
-            // let the original require call handle this...
+            printUtil.printWarn(`Error during require(${requirePath})`, err)
         }
 
         return originalRequire.apply(this, [requirePath, ...remainingArgs]);
     }
 }
 
-module.exports = {mockBrowser, overwriteRequire}
+module.exports = {mockBrowser, nodeifyRequire}
