@@ -7,7 +7,7 @@
   "author": "beac0n <mcschempp@gmx.de>",
   "license": "MIT",
   "bin": {
-    "simple-react-prerender": "./index.js"
+    "simple-react-prerender": "./script.js"
   },
   "dependencies": {
     "babel-cli": "^6.24.1",
@@ -17,6 +17,8 @@
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "dotenv": "^4.0.0",
+    "es6-promise": "^4.1.0",
+    "isomorphic-fetch": "^2.2.1",
     "mock-browser": "^0.92.14",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"

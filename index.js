@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const path = require('path')
 const fs = require('fs')
 
@@ -9,47 +7,48 @@ const ReactDOMServer = require('react-dom/server')
 
 const util = require('./util')
 const printUtil = require('./printUtil')
-const program = require('./cliSetup')
-
-const {html, rootId, app, babel, dry} = program
 
 process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
 
 const fsOptions = {encoding: 'utf8'}
-const divPrefix = `<div id="${rootId}">`
-const divSuffix = '</div>'
-const div = divPrefix + divSuffix
-
-printUtil.print(`Creating an optimized, prerendered index.html...`)
-if (dry) {
-    printUtil.info(`Dry run is enabled - no files will be changed...`)
-}
-printUtil.print()
 
 const steps = [
+    ({dry}) => {
+        process.env.NODE_ENV = 'production'
+        process.env.ON_SERVER = 'true'
+
+        printUtil.print(`Creating an optimized, prerendered index.html...`)
+        if (dry) {
+            printUtil.info(`Dry run is enabled - no files will be changed...`)
+        }
+        printUtil.print()
+    },
     (state) => {
         // TODO: check if babel is a rc file => load file
+        const {babel} = state
         if (babel) {
             state.hasError = !printUtil.handle({
                 verb: 'Parse',
                 suffix: `your provided ${chalk.yellow('babel')} config`,
                 errorPart: 'parse',
                 hint: `Make sure your ${chalk.yellow('babel')} config is a valid ${chalk.yellow('JSON')} string`,
-            }, () => require('babel-register')(JSON.parse(babel)))
+            }, () => require('babel-register')(typeof babel === 'string' ? JSON.parse(babel) : babel))
         }
     },
     (state) => {
         util.mockBrowser()
         util.nodeifyRequire()
+        const {app} = state
         state.hasError = !printUtil.handle({
             verb: 'Execute',
             suffix: `${chalk.yellow(`require(${app}).default`)}`,
             hint: `The file in ${app} has to export the App using either ${chalk.yellow('export default App')} or ` +
             `${chalk.yellow('module.exports = { default: App}')}`,
-        }, () => state.App = require(app).default)
+        }, () => state.AppComponent = require(app).default)
     },
     (state) => {
+        const {app, props} = state
         state.hasError = !printUtil.handle({
             verb: 'Prerender',
             suffix: `React Component from ${chalk.yellow(app)}`,
@@ -57,9 +56,10 @@ const steps = [
             `Try using the ${chalk.yellow('ON_SERVER')} environment variable in your code, to check if your code is being prerendered or not.\n` +
             `If you are using the Web API (like ${chalk.yellow('new FormData()')}), try calling the constructor from ` +
             `the window object (e.g. ${chalk.yellow('new window.FormData()')}`,
-        }, () => state.prerendererd = ReactDOMServer.renderToString(React.createElement(state.App)))
+        }, () => state.prerendererd = ReactDOMServer.renderToString(React.createElement(state.AppComponent, props)))
     },
     (state) => {
+        const {html, dry} = state
         state.hasError = !printUtil.handle({
             verb: 'Read',
             suffix: chalk.yellow(html),
@@ -67,6 +67,7 @@ const steps = [
         }, () => state.builtIndexHtml = fs.readFileSync(html, fsOptions), dry)
     },
     (state) => {
+        const {html, dry, div, divPrefix, divSuffix} = state
         state.hasError = !printUtil.handle({
             verb: 'Search',
             suffix: `for ${chalk.yellow(div)} in file in ${chalk.yellow(html)}`,
@@ -78,12 +79,14 @@ const steps = [
         }, dry)
     },
     (state) => {
+        const {dry, div, divPrefix, divSuffix} = state
         state.hasError = !printUtil.handle({
             verb: 'Replace',
             suffix: `${chalk.yellow(div)} with prerendered html`,
         }, () => state.newIndexHtml = state.builtIndexHtml.replace(div, divPrefix + state.prerendererd + divSuffix), dry)
     },
     (state) => {
+        const {html, app, dry} = state
         state.hasError = !printUtil.handle({
             verb: 'Overwrite',
             suffix: `${chalk.yellow(html)}, containing the prerendered React Component from ${chalk.yellow(app)}`,
@@ -91,20 +94,29 @@ const steps = [
             `and that it is not being used by another process`,
         }, () => fs.writeFileSync(html, state.newIndexHtml, fsOptions), dry)
     },
+    () => {
+        printUtil.success('Prerendered successfully.')
+        printUtil.print()
+    },
 ]
 
-steps.reduce((state, step) => {
-    step(state)
+const execute = ({html, rootId = 'root', app, props, babel, dry = false}) => {
+    const divPrefix = `<div id="${rootId}">`
+    const divSuffix = '</div>'
+    const div = divPrefix + divSuffix
 
-    if (state.hasError) {
-        printUtil.info('Stopping prerender')
-        process.exit(1)
+    const state = {hasError: false, html, divPrefix, divSuffix, div, app, props, babel, dry}
+
+    for(let i = 0; i < steps.length; ++i) {
+        steps[i](state)
+
+        if (state.hasError) {
+            printUtil.info('Stopping prerender')
+            return false
+        }
     }
 
-    return state
+    return true
+}
 
-}, {hasError: false})
-
-printUtil.success('Prerendered successfully.')
-printUtil.print()
-process.exit(0)
+module.exports = execute

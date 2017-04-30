@@ -14,16 +14,20 @@ then use `simple-react-prerender` as script in your `package json`.
 Don't forget to supply the mandatory arguments:
 
 ```
--h --html <htmlPath>      path to built html
--a --app <appPath>        path to app source file
--i --rootId <rootId>      div id where the app is rendered
--b --babel [babelConfig]  a JSON string, providing your babel config
+-h, --help                  output usage information
+-V, --version               output the version number
+-h --html <htmlPath>        path to built html
+-a --app <appPath>          path to app source file
+-p --props <appProperties>  properties for the app
+-i --rootId <rootId>        div id where the app is rendered
 ```
 
-For example:
-
-```json
-"scripts": {
-  "prerender": "simple-react-prerender -h /home/foobar/dev/barfoo/build/index.html -a /home/foobar/dev/barfoo/src/App/index.js -i root -b '{\"presets\":[\"react-app\"]}'"
-}
+or use it in a self written script:
+```
+const prerenderer = require('simple-react-prerender')
+prerenderer({
+    html: '/path/to/index.html',
+    app: '/path/to/App/index.js',
+    props: {properties, for, the, app}
+})
 ```

@@ -4,7 +4,11 @@ const MockBrowser = require('mock-browser').mocks.MockBrowser
 const printUtil = require('./printUtil')
 
 // jsdom keeps global stuff in window._core: https://github.com/tmpvar/jsdom/blob/master/lib/jsdom/browser/Window.js
-const globalizeWebAPIs = () => Object.keys(global.window._core).forEach((key) => global[key] = global.window._core[key])
+// ignore fetch, because we will actually make it usable
+const globalizeWebAPIs = () => Object.keys(global.window._core)
+    .filter((key) => key !== 'fetch')
+    .forEach((key) => global[key] = global.window._core[key])
+
 const mockBrowser = () => {
     if (global.window) return
 
@@ -19,6 +23,9 @@ const mockBrowser = () => {
     global.sessionStorage = mockBrowser.getSessionStorage()
 
     globalizeWebAPIs()
+
+    require('es6-promise').polyfill()
+    require('isomorphic-fetch')
 }
 
 const nodeifyRequire = () => {
