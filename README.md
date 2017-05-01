@@ -10,24 +10,27 @@ Install the script
 yarn add simple-react-prerender --dev
 ```
 
-then use `simple-react-prerender` as script in your `package json`.
-Don't forget to supply the mandatory arguments:
-
-```
--h, --help                  output usage information
--V, --version               output the version number
--h --html <htmlPath>        path to built html
--a --app <appPath>          path to app source file
--p --props <appProperties>  properties for the app
--i --rootId <rootId>        div id where the app is rendered
-```
-
-or use it in a self written script:
+then use it in a self written script:
 ```
 const prerenderer = require('simple-react-prerender')
 prerenderer({
+    // the path to the file where the app shall be prerendered
     html: '/path/to/index.html',
+    // the app to prerender
     app: '/path/to/App/index.js',
+    // the props for the app
     props: {properties, for, the, app}
+    // the config of jsdom - useful if you are using ReactRouter
+    jsDom: {
+        url: 'https://example.org/',
+        referrer: 'https://example.org/',
+        contentType: 'text/html',
+    },
+    // the babel config - will be used with babe-register
+    babel: undefined,
+    // dry run - no file will be changed
+    dry: false,
+    // silent mode - don't print anything on the console
+    silent: false,
 })
 ```

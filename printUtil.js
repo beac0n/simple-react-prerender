@@ -34,7 +34,7 @@ const getPresentParticiple = (verb = '') => {
     return base + 'ing'
 }
 
-const handle = (message = {}, callback = (() => {}), skip = false) => {
+const handle = (message = {}, callback = (() => {}), silent = false, skip = false) => {
     const {verb = '', suffix = '', hint = ''} = message
 
     const onError = (err) => {
@@ -50,20 +50,21 @@ const handle = (message = {}, callback = (() => {}), skip = false) => {
     }
 
     if (skip) {
-        printNoLineBreak(parseMessage(`Skipping to ${verb.toLowerCase()} ${suffix}...`, blueInfo))
+        !silent && printNoLineBreak(parseMessage(`Skipping to ${verb.toLowerCase()} ${suffix}...`, blueInfo))
     }
     else {
-        printNoLineBreak(`${getPresentParticiple(verb)} ${suffix}...`)
+        !silent && printNoLineBreak(`${getPresentParticiple(verb)} ${suffix}...`)
+
         try {
             callback()
         }
         catch (err) {
-            onError(err)
+            !silent && onError(err)
             return false
         }
     }
 
-    success()
+    !silent && success()
     return true
 }
 

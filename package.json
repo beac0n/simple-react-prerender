@@ -6,9 +6,6 @@
   "repository": "https://github.com/beac0n/create-react-app-prerender.git",
   "author": "beac0n <mcschempp@gmx.de>",
   "license": "MIT",
-  "bin": {
-    "simple-react-prerender": "./script.js"
-  },
   "dependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-react-app": "^2.2.0",
@@ -19,6 +16,7 @@
     "dotenv": "^4.0.0",
     "es6-promise": "^4.1.0",
     "isomorphic-fetch": "^2.2.1",
+    "jsdom": "^10.1.0",
     "mock-browser": "^0.92.14",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
