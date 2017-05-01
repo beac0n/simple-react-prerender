@@ -18,7 +18,7 @@ const initSteps = [
 ]
 
 const dryRunInfoSteps = [
-    () => printUtil.info(`Dry run is enabled - no files will be changed...`)
+    () => printUtil.info(`Dry run is enabled - no files will be changed...`),
 ]
 
 const infoSteps = [
