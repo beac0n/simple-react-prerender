@@ -51,7 +51,7 @@ You should also read this: http://redux.js.org/docs/recipes/ServerRendering.html
 
 Provide a component, which wraps the `react-redux` `Provider` component.
 This file will be used by simple-react-prerender, to prerender your app:
-```
+```javascript
 import React from 'react'
 import {Provider} from 'react-redux'
 import AppRouter from './components/appRouter'
@@ -62,7 +62,7 @@ export default ProviderApp
 ```
 
 Furthermore, you will need a prerender script:
-```
+```javascript
 const prerenderer = require('simple-react-prerender')
 
 // if your store initializer needs babel
