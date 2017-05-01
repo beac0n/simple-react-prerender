@@ -30,16 +30,15 @@ const steps = [
         printUtil.print()
     },
     (state) => {
-        // TODO: check if babel is a rc file => load file
         const {babel, silent} = state
-        if (babel) {
-            state.hasError = !printUtil.handle({
-                verb: 'Parse',
-                suffix: `your provided ${chalk.yellow('babel')} config`,
-                errorPart: 'parse',
-                hint: `Make sure your ${chalk.yellow('babel')} config is a valid ${chalk.yellow('JSON')} string`,
-            }, () => require('babel-register')(typeof babel === 'string' ? JSON.parse(babel) : babel), silent)
-        }
+
+        state.hasError = !printUtil.handle({
+            verb: 'Parse',
+            suffix: `your provided ${chalk.yellow('babel')} config`,
+            errorPart: 'parse',
+            hint: `Make sure your ${chalk.yellow('babel')} config is a valid ${chalk.yellow('JSON')} string`,
+        }, () => require('babel-register')(typeof babel === 'string' ? JSON.parse(babel) : babel), silent)
+
     },
     (state) => {
         const {app, silent} = state
@@ -101,7 +100,7 @@ const steps = [
     ({silent}) => !silent && printUtil.print(),
 ]
 
-const execute = ({rootId = 'root', html, app, props = {}, jsDom, babel, dry = false, silent = false}) => {
+const execute = ({rootId = 'root', html, app, props = {}, jsDom, babel = {presets: ['react-app']}, dry = false, silent = false}) => {
     const divPrefix = `<div id="${rootId}">`
     const divSuffix = '</div>'
     const div = divPrefix + divSuffix
