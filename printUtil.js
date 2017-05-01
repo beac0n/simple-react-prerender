@@ -11,12 +11,23 @@ const parseMessage = (message = '', newLineReplacement = '') => typeof message =
     ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`.trim()
     : ''
 
-const info = (message = '') => console.info(chalk.white(parseMessage(message, blueInfo)))
-const warn = (message = '') => console.warn(parseMessage(message, yellowSign))
-const error = (message = '') => console.error(parseMessage(message, redCross))
-const printNoLineBreak = (message = '') => process.stdout.write(message.trim())
 
-const print = (message = '') => console.log(message.trim())
+let isSilent = false
+const setSilent = (silent) => isSilent = silent
+
+const printTo = ['info', 'warn', 'error', 'log'].reduce((accumulator, consoleType) => {
+    accumulator[consoleType] = (...args) => isSilent ? undefined : console[consoleType](...args)
+    return accumulator
+}, {})
+
+printTo.write = (...args) => isSilent ? undefined : process.stdout.write(...args)
+
+const info = (message = '') => printTo.info(chalk.white(parseMessage(message, blueInfo)))
+const warn = (message = '') => printTo.warn(parseMessage(message, yellowSign))
+const error = (message = '') => printTo.error(parseMessage(message, redCross))
+const print = (message = '') => printTo.log(message.trim())
+const printNoLineBreak = (message = '') => printTo.write(message.trim())
+
 const success = (message = '') => print(chalk.green(`${message} ${greenHook}`))
 
 const getPresentParticiple = (verb = '') => {
@@ -34,14 +45,14 @@ const getPresentParticiple = (verb = '') => {
     return base + 'ing'
 }
 
-const handle = (message = {}, callback = (() => {}), silent = false, skip = false) => {
+const handle = (message = {}, callback = (() => {})) => {
     const {verb = '', suffix = '', hint = ''} = message
 
     const onError = (err) => {
         print()
         error(`Failed to ${verb.toLowerCase()} ${suffix}`)
         if (err) {
-            console.error(redCross, err)
+            printTo.error(redCross, err)
         }
 
         if (hint) {
@@ -49,23 +60,18 @@ const handle = (message = {}, callback = (() => {}), silent = false, skip = fals
         }
     }
 
-    if (skip) {
-        !silent && printNoLineBreak(parseMessage(`Skipping to ${verb.toLowerCase()} ${suffix}...`, blueInfo))
-    }
-    else {
-        !silent && printNoLineBreak(`${getPresentParticiple(verb)} ${suffix}...`)
+    printNoLineBreak(`${getPresentParticiple(verb)} ${suffix}...`)
 
-        try {
-            callback()
-        }
-        catch (err) {
-            !silent && onError(err)
-            return false
-        }
+    try {
+        callback()
+    }
+    catch (err) {
+        onError(err)
+        return false
     }
 
-    !silent && success()
+    success()
     return true
 }
 
-module.exports = {handle, success, info, warn, print}
+module.exports = {handle, success, info, warn, print, setSilent}

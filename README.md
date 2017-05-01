@@ -21,7 +21,9 @@ then use it in a self written script:
 ```javascript
 const prerenderer = require('simple-react-prerender')
 prerenderer({
-    // mandatory: the path to the file where the app shall be prerendered
+    // optional: the path to the file where the app shall be prerendered
+    // if provided, simple-react-prerender will write the prerendered app here
+    // if not provided, simple-react-prerender will return the prerendered string
     html: '/path/to/index.html',
     // mandatory: the app to prerender
     app: '/path/to/App/index.js',
@@ -33,7 +35,7 @@ prerenderer({
         referrer: 'https://example.org/',
         contentType: 'text/html',
     },
-    // optional: the babel config - will be used with babe-register
+    // optional: the babel config - will be used with babel-register
     // can be a JSON string or an object
     babel: undefined,
     // optional: dry run - no file will be changed
@@ -44,6 +46,8 @@ prerenderer({
 ```
 
 # Usage with Redux
+
+You should also read this: http://redux.js.org/docs/recipes/ServerRendering.html
 
 Provide a component, which wraps the `react-redux` `Provider` component.
 This file will be used by simple-react-prerender, to prerender your app:
