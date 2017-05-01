@@ -21,7 +21,7 @@ const execute = ({rootId = 'root', html, app, props = {}, jsDom, babel = {preset
         babel,
     }
 
-    const steps = [
+    const stepsArray = [
         ...steps.initSteps,
         ...(html && dry ? steps.dryRunInfoSteps : []),
         ...steps.infoSteps,
@@ -32,8 +32,8 @@ const execute = ({rootId = 'root', html, app, props = {}, jsDom, babel = {preset
 
     printUtil.setSilent(silent)
 
-    for (let i = 0; i < steps.length; ++i) {
-        steps[i](state)
+    for (let i = 0; i < stepsArray.length; ++i) {
+        stepsArray[i](state)
 
         if (state.hasError) {
             printUtil.info('Stopping prerender')
