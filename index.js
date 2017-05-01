@@ -1,5 +1,5 @@
 const printUtil = require('./printUtil')
-const steps = require('steps')
+const steps = require('./steps')
 
 process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
