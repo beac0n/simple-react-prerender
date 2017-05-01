@@ -123,17 +123,15 @@ const execute = ({rootId = 'root', html, app, props = {}, jsDom, babel = {preset
         props,
         jsDom,
         babel,
-        dry,
-        silent,
     }
 
     const steps = [
         ...initSteps,
-        ...(dry ? dryRunInfoSteps : []),
-        ...(silent ? [] : infoSteps),
+        ...(html && dry ? dryRunInfoSteps : []),
+        ...infoSteps,
         ...mandatorySteps,
         ...(html && !dry ? htmlReplaceSteps : []),
-        ...endSteps
+        ...endSteps,
     ]
 
     printUtil.setSilent(silent)

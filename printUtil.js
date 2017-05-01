@@ -6,12 +6,6 @@ const redCross = chalk.red('\u2716')
 const greenHook = chalk.green('\u2714')
 const blueInfo = chalk.blue('\u2139')
 
-const messageParseRegex = new RegExp('\n', 'g')
-const parseMessage = (message = '', newLineReplacement = '') => typeof message === 'string'
-    ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`.trim()
-    : ''
-
-
 let isSilent = false
 const setSilent = (silent) => isSilent = silent
 
@@ -21,6 +15,11 @@ const printTo = ['info', 'warn', 'error', 'log'].reduce((accumulator, consoleTyp
 }, {})
 
 printTo.write = (...args) => isSilent ? undefined : process.stdout.write(...args)
+
+const messageParseRegex = new RegExp('\n', 'g')
+const parseMessage = (message = '', newLineReplacement = '') => typeof message === 'string'
+    ? `${newLineReplacement} ${message.replace(messageParseRegex, `\n${newLineReplacement} `)}.`.trim()
+    : ''
 
 const info = (message = '') => printTo.info(chalk.white(parseMessage(message, blueInfo)))
 const warn = (message = '') => printTo.warn(parseMessage(message, yellowSign))
