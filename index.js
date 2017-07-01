@@ -4,7 +4,14 @@ const steps = require('./src/steps')
 process.env.NODE_ENV = 'production'
 process.env.ON_SERVER = 'true'
 
-const execute = ({rootId = 'root', html, app, props = {}, jsDom, babel = {presets: ['react-app']}, dry = false, silent = false}) => {
+const execute = (config) => {
+    if(!config) {
+        throw new Error('no config object was provided. Please check the README and prove a valid config object.')
+    }
+
+    const {html, app, jsDom} = config
+    const {rootId = 'root', props = {}, babel = {presets: ['react-app']}, dry = false, silent = false} = config
+
     const divPrefix = `<div id="${rootId}">`
     const divSuffix = '</div>'
     const div = divPrefix + divSuffix
