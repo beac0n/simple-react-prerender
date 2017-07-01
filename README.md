@@ -20,26 +20,41 @@ npm install simple-react-prerender --save-dev
 then use it in a self written script:
 ```javascript
 const prerenderer = require('simple-react-prerender')
+const MyAppToPrerender = require('./src/myAppToPrerender')
+
+const jsDomConfig = {
+    url: 'https://example.org/',
+    referrer: 'https://example.org/',
+    contentType: 'text/html',
+}
+
+// use prerenderer.mockBrowser, if you are NOT providing the app via a file path.
+prerenderer.mockBrowser(jsDomConfig)
+
 prerenderer({
     // optional: the path to the file where the app shall be prerendered
-    // if provided, simple-react-prerender will write the prerendered app here
+    // if provided, simple-react-prerender will write the prerendered app there
     // if not provided, simple-react-prerender will return the prerendered string
     html: '/path/to/index.html',
-    // mandatory: the app to prerender
+
+    // mandatory: the app to prerender. This can be either a file path, or the required app itself
     app: '/path/to/App/index.js',
+    // app: MyAppToPrerender,
+
     // optional: the props for the app
     props: {}
+
     // optional: the config of jsdom - useful if you are using ReactRouter
-    jsDom: {
-        url: 'https://example.org/',
-        referrer: 'https://example.org/',
-        contentType: 'text/html',
-    },
+    // if using ReactRouter, check https://reacttraining.com/react-router/web/guides/server-rendering
+    jsDom: jsDomConfig,
+
     // optional: the babel config - will be used with babel-register
     // can be a JSON string or an object
     babel: undefined,
+
     // optional: dry run - no file will be changed
     dry: false,
+
     // optional: silent mode - don't print anything on the console
     silent: false,
 })

@@ -13,8 +13,6 @@ const mockBrowser = (jsDom = {
     referrer: 'https://example.org/',
     contentType: 'text/html',
 }) => {
-    if (global.window && global.window.__SIMPLE_REACT_PRERENDER__) return
-
     const dom = new JSDOM('', jsDom);
 
     global.window = dom.window

@@ -26,6 +26,26 @@ const infoSteps = [
     () => printUtil.print(),
 ]
 
+const requireAppStep = (state) => {
+    const {app} = state
+    state.hasError = !printUtil.handle({
+        verb: 'Execute',
+        suffix: `${chalk.yellow(`require(${app}).default`)}`,
+        hint: `The file in ${app} has to export the App using either ${chalk.yellow('export default App')} or ` +
+        `${chalk.yellow('module.exports = { default: App}')}`,
+    }, () => state.AppComponent = require(app).default)
+}
+
+const useRequiredAppStep = (state) => {
+    const {app} = state
+    state.hasError = !printUtil.handle({
+        verb: 'Use',
+        suffix: `${chalk.yellow(app.default)}`,
+        hint: `The file where ${app} was imported from has to export the App using either ${chalk.yellow('export default App')} or ` +
+        `${chalk.yellow('module.exports = { default: App}')}`,
+    }, () => state.AppComponent = app.default)
+}
+
 const mandatorySteps = [
     (state) => {
         const {babel} = state
@@ -37,20 +57,12 @@ const mandatorySteps = [
             hint: `Make sure your ${chalk.yellow('babel')} config is a valid ${chalk.yellow('JSON')} string`,
         }, () => require('babel-register')(typeof babel === 'string' ? JSON.parse(babel) : babel))
     },
-    (state) => {
-        const {app} = state
-        state.hasError = !printUtil.handle({
-            verb: 'Execute',
-            suffix: `${chalk.yellow(`require(${app}).default`)}`,
-            hint: `The file in ${app} has to export the App using either ${chalk.yellow('export default App')} or ` +
-            `${chalk.yellow('module.exports = { default: App}')}`,
-        }, () => state.AppComponent = require(app).default)
-    },
+    (state) => typeof state.app === 'string' ? requireAppStep(state) : useRequiredAppStep(state),
     (state) => {
         const {app, props} = state
         state.hasError = !printUtil.handle({
             verb: 'Prerender',
-            suffix: `React Component from ${chalk.yellow(app)}`,
+            suffix: `React Component from ${chalk.yellow(typeof app === 'string' ? app : app.default)}`,
             hint: `We are trying to mock the browser the best we can, but sometimes that doesn't work.\n` +
             `Try using the ${chalk.yellow('ON_SERVER')} environment variable in your code, to check if your code is being prerendered or not.\n` +
             `If you are using the Web API (like ${chalk.yellow('new FormData()')}), try calling the constructor from ` +
