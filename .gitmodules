@@ -1,0 +1,3 @@
+[submodule "test/velocity-manager"]
+	path = test/velocity-manager
+	url = https://github.com/beac0n/velocity-manager.git
